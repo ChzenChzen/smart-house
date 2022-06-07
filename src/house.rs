@@ -1,4 +1,4 @@
-use crate::{Manager, Room};
+use crate::{Device, Manager, Room};
 
 #[derive(Debug, Clone)]
 pub struct House {
