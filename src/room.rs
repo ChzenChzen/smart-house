@@ -47,7 +47,7 @@ impl<T> Room<T> {
         }
     }
 
-    pub(crate) fn iter(&self) -> impl Iterator<Item = &T> {
+    pub fn iter(&self) -> impl Iterator<Item = &T> {
         self.devices.values()
     }
 }
