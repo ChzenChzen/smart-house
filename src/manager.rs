@@ -1,8 +1,9 @@
+use crate::HouseError;
+
 pub trait Manager {
-    type Output;
+    type Item;
 
     fn name(&self) -> &str;
-    fn list(&self) -> &[Self::Output];
-    fn add(&mut self, item: Self::Output);
-    fn remove(&mut self, item: &str);
+    fn add(&mut self, item: Self::Item) -> Result<(), HouseError>;
+    fn remove(&mut self, item: impl AsRef<str>) -> Result<(), HouseError>;
 }
