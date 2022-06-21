@@ -48,7 +48,7 @@ pub struct DeviceInfoReport {
     pub room_name: String,
 }
 impl DeviceInfoReport {
-    fn new(device_name: impl AsRef<str>, room_name: impl AsRef<str>) -> Self {
+    pub fn new(device_name: impl AsRef<str>, room_name: impl AsRef<str>) -> Self {
         Self {
             device_name: device_name.as_ref().to_owned(),
             room_name: room_name.as_ref().to_owned(),
