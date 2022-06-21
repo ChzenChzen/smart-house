@@ -1,10 +1,10 @@
 use crate::{DeviceInfo, DeviceInfoReportComposer, HouseError, Manager, Room};
 use std::collections::HashMap;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct House<T> {
-    name: String,
-    rooms: HashMap<String, Room<T>>,
+    pub name: String,
+    pub rooms: HashMap<String, Room<T>>,
 }
 
 impl<T: DeviceInfo> House<T> {
@@ -13,6 +13,10 @@ impl<T: DeviceInfo> House<T> {
             name: name.as_ref().to_owned(),
             rooms: HashMap::new(),
         }
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &Room<T>> {
+        self.rooms.values()
     }
 
     pub fn add_device_to_room<V: AsRef<str>>(
@@ -53,7 +57,7 @@ impl<T: DeviceInfo> House<T> {
 
 impl<T: DeviceInfo> Manager for House<T> {
     type Item = Room<T>;
-    
+
     fn name(&self) -> &str {
         &self.name
     }
@@ -76,39 +80,41 @@ impl<T: DeviceInfo> Manager for House<T> {
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-//     use crate::Device;
-//
-//     #[test]
-//     fn list_devices_from_room() {
-//         let mut house = House::new("House".to_string());
-//         let mut room = Room::new("Room".to_string());
-//         let device = Device::new("Device".to_string());
-//
-//         room.add(device.clone());
-//         house.add(room.clone());
-//
-//         assert_eq!(house.list_from_room("Room"), &[device]);
-//     }
-//
-//     #[test]
-//     fn add_room_to_house_and_check_name() {
-//         let mut house = House::new("House".to_string());
-//         let room = Room::new("Room".to_string());
-//         house.add(room);
-//         assert_eq!(house.list().len(), 1);
-//         assert_eq!(house.list()[0].name(), "Room");
-//     }
-//
-//     #[test]
-//     fn remove_room_from_house() {
-//         let mut house = House::new("House".to_string());
-//         let room = Room::new("Room".to_string());
-//         house.add(room);
-//         assert_eq!(house.list().len(), 1);
-//         house.remove("Room");
-//         assert_eq!(house.list().len(), 0);
-//     }
-// }
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::Thermo;
+
+    #[test]
+    fn list_devices_from_room() {
+        let mut club = House::new("Club");
+        let mut dance_hall = Room::new("Dance-hall");
+        let thermo = Thermo::new("thermo", false);
+        dance_hall.add(thermo.clone()).unwrap();
+        club.add(dance_hall).unwrap();
+        let actual: Vec<_> = club.iter_devices_for_room("Dance-hall").unwrap().collect();
+
+        assert_eq!(&actual, &[&thermo]);
+    }
+
+    #[test]
+    fn add_room_to_house_and_check_name() {
+        let mut club = House::new("Club");
+        let mut dance_hall = Room::new("Dance-hall");
+        let thermo = Thermo::new("thermo", false);
+        dance_hall.add(thermo).unwrap();
+        club.add(dance_hall.clone()).unwrap();
+        assert_eq!(club.iter().nth(0).unwrap().name(), dance_hall.name());
+    }
+
+    #[test]
+    fn remove_room_from_house() {
+        let mut club = House::new("Club");
+        let mut dance_hall = Room::new("Dance-hall");
+        let thermo = Thermo::new("thermo", false);
+        dance_hall.add(thermo).unwrap();
+        club.add(dance_hall).unwrap();
+        club.remove("Dance-hall").unwrap();
+        assert_eq!(club.iter().count(), 0);
+    }
+}
